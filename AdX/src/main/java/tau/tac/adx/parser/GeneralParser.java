@@ -191,10 +191,11 @@ public class GeneralParser extends Parser {
 						
 						if (Math.abs(expectedBalance - receiverData.daysData[verifiedDay].reportedBalance) > 0.01) {
 							/* ERROR: Quality Rating Computation */
+							double reportedBalance = receiverData.daysData[verifiedDay].reportedBalance;
 							System.out.println(getBasicInfoString(receiver)
 									+ StringUtils.rightPad("BankStatus: ", 20)
-									+ "ERROR: Balance Computation of day " + verifiedDay 
-									+ "  Reported : " + receiverData.daysData[verifiedDay].reportedBalance + " Expected: " + expectedBalance 
+									+ "ERROR: Balance Computation of day " + verifiedDay +" Diff: " + (reportedBalance-expectedBalance)
+									+ "  Reported : " + reportedBalance + " Expected: " + expectedBalance 
 									+ "(" + receiverData.daysData[verifiedDay].accumulatedRevenue+ " - " + receiverData.daysData[verifiedDay].adxAccumulatedCosts
 									+ " - " + receiverData.daysData[verifiedDay].ucsAccumulatedCosts +")"
 									);
@@ -416,7 +417,14 @@ public class GeneralParser extends Parser {
 					HashMap<Integer, CampaignStats> cmpDailyStats = receiverData.daysData[cmpStartDayById.get(campaignId)].cmpDailyStats;
 				if (!cmpDailyStats.isEmpty()){
 					Double dailyLimit = receiverData.daysData[d].cmpBudgetDailyLimits.get(campaignId);
-					double cost = cmpDailyStats.get(d).getCost();
+					
+					double cost;
+					//since the daily stats aggregate results we need to subtract two consecutive days to get the result for a single day.
+					if(d > cmpStartDayById.get(campaignId)) {
+						cost = cmpDailyStats.get(d).getCost() - cmpDailyStats.get(d-1).getCost();
+					} else{
+						cost = cmpDailyStats.get(d).getCost();
+					}
 					if(cost > dailyLimit && (cost - dailyLimit) > 0.1) {
 					/* ERROR: Cost Computation AdnetReport vs CmpReport */
 					System.out.println(getBasicInfoString(receiver)

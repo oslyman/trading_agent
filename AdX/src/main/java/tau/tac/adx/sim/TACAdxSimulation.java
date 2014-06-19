@@ -139,14 +139,11 @@ public class TACAdxSimulation extends Simulation implements AdxAgentRepository,
 	/**
 	 * The system's main event bus.
 	 */
-	public static EventBus eventBus = new EventBus(
-			TACAdxConstants.ADX_EVENT_BUS_NAME);
+	private EventBus eventBus;
 	
-	public static Set<AdxBidTrackerImpl.AdxQueryBid> bidTrackers;
 
 	private boolean recoverAgents = false;
-	private final AdxAuctioneer auctioneer = injector
-			.getInstance(AdxAuctioneer.class);
+	private AdxAuctioneer auctioneer;
 
 	private static final Logger log = Logger.getLogger(TACAdxSimulation.class
 			.getName());
@@ -182,8 +179,9 @@ public class TACAdxSimulation extends Simulation implements AdxAgentRepository,
 
 	@Override
 	protected void setupSimulation() throws IllegalConfigurationException {
-		
-		bidTrackers = new HashSet<AdxBidTrackerImpl.AdxQueryBid>();
+		eventBus = new EventBus(
+				TACAdxConstants.ADX_EVENT_BUS_NAME);
+		auctioneer = injector.getInstance(AdxAuctioneer.class);
 		ConfigManager config = getConfig();
 		SimulationInfo info = getSimulationInfo();
 		AdxConfigurationParser adxConfigurationParser = new AdxConfigurationParser(

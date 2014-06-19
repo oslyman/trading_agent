@@ -239,20 +239,20 @@ public class AdxBidTrackerImpl implements AdxBidTracker {
 					return advertiser;
 				}
 			};
+			AdxManager.getInstance().getSimulation().getEventBus().register(this);
 			
 		}
 
 		@Subscribe
 		public void limitReached(CampaignLimitReached message) {
-			// FIXME: uncomment me
-			//if (message.getAdNetwork().equals(advertiser)) {
+			if (message.getAdNetwork().equals(advertiser)) {
 				if(excludedCampaigns.contains(message.getCampaignId())) {
 					logger.severe("Limit request was already sent today to stop bidding for campaign #"+message.getCampaignId()+" due to limit");
 				}
 				excludedCampaigns.add(message.getCampaignId());
 				queryMap.clear();
-				logger.info("Accepted request to stop bidding for campaign #"+message.getCampaignId()+" due to limit. My name is "+advertiser);
-			//}
+				logger.info("Accepted request to stop bidding for "+message +" due to limit. My name is "+advertiser);
+			}
 		}
 
 		public void clearQueries() {
@@ -262,13 +262,6 @@ public class AdxBidTrackerImpl implements AdxBidTracker {
 		}
 
 		public BidInfo generateBid(AdxQuery query) {
-			if(!registeredToEventBus){
-				logger.info("Registering AdxQueryBid for advertiser: "+advertiser +" to the event bus");
-				AdxManager.getInstance().getSimulation().getEventBus().register(this);
-				TACAdxSimulation.bidTrackers.add(this);
-				logger.info("Registered AdxQueryBid for advertiser: "+advertiser +" to the event bus");
-				registeredToEventBus = true;
-			}
 			WheelSampler<BidEntry> sampler = queryMap.get(query);
 			if (sampler == null) {
 				sampler = new WheelSampler<AdxBidBundle.BidEntry>();
